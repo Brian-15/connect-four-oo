@@ -23,9 +23,11 @@ class Game {
     this.HEIGHT = height;
     this.board = [];
     this.currPlayer = 1;
+    this.isPlaying = false;
 
     this.makeBoard();
     this.makeHtmlBoard();
+    this.makeMenu();
   }
 
   /** makeBoard: create in-JS board structure:
@@ -45,7 +47,7 @@ class Game {
 
     // make column tops (clickable area for adding a piece to that column)
     const top = document.createElement('tr');
-    top.setAttribute('id', 'column-top');
+    top.setAttribute('id', 'row-top');
 
     // bind event listener function to class object
     this.handleClicked = this.handleClick.bind(this);
@@ -74,6 +76,48 @@ class Game {
     }
   }
 
+  /** makeMenu: create menu */
+
+  makeMenu() {
+    const menu = document.getElementById('menu');
+
+    this.createStartButton();
+  }
+
+  // handle start button click
+  handleStartClick(evt) {
+    this.isPlaying = true;
+    evt.target.removeEventListener('click', this.handleStart);
+  }
+
+  /** deactivateStartButton: remove start button event listener*/
+  deactivateStartButton() {
+    const startButton = document.getElementById('start-button');
+    startButton.removeEventListener('click', this.handleStart);
+  }
+
+  /** activateStartButton: add event listener to start button */
+  activateStartButton() {
+    const startButton = document.getElementById('start-button');
+    this.handleStart = this.handleStartClick.bind(this);
+    startButton.addEventListener('click', this.handleStart);
+  }
+
+  // create start button
+  createStartButton() {
+    // create start button element
+    const start = document.createElement('button');
+    start.setAttribute('id', 'start-button');
+    start.innerText = 'START';
+
+    // add button to DOM
+    const menu = document.getElementById('menu');
+    menu.appendChild(start);
+
+    // add event handler to start button
+    this.activateStartButton();
+  }
+
   /** placeInTable: update DOM to place piece into HTML table of board */
 
   placeInTable(y, x) {
@@ -89,12 +133,24 @@ class Game {
   /** endGame: announce game end */
   
   endGame(msg) {
-    alert(msg);
+    this.isPlaying = false;
+
+    this.activateStartButton();
+
+    setTimeout( () =>
+      alert(msg),
+      100
+    );
+    
   }
 
   /** handleClick: handle click of column top to play piece */
 
   handleClick(evt) {
+
+    // cancel event if game is not in session
+    if (!this.isPlaying) return;
+
     // get x from ID of clicked cell
     const x = +evt.target.id;
 
@@ -157,6 +213,8 @@ class Game {
       }
     }
   }
+
+  
 
 }
 
