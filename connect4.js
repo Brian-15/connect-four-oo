@@ -88,6 +88,8 @@ class Game {
   handleStartClick(evt) {
     this.isPlaying = true;
     evt.target.removeEventListener('click', this.handleStart);
+    // delete all pieces from HTML and class boards
+    this.emptyBoard();
   }
 
   /** deactivateStartButton: remove start button event listener*/
@@ -103,7 +105,7 @@ class Game {
     startButton.addEventListener('click', this.handleStart);
   }
 
-  // create start button
+  /** createStartButton: creates start button and appends it to menu div */
   createStartButton() {
     // create start button element
     const start = document.createElement('button');
@@ -135,13 +137,30 @@ class Game {
   endGame(msg) {
     this.isPlaying = false;
 
-    this.activateStartButton();
+    
 
-    setTimeout( () =>
-      alert(msg),
+    // add delay to ensure last piece has been added
+    setTimeout( () => {
+        
+        alert(msg);
+        // reactivate start button -- add event listener
+        this.activateStartButton();
+      },
       100
     );
     
+  }
+
+  /** emptyBoard: empty board of all pieces */
+  emptyBoard() {
+    // empty board matrix
+    this.board.forEach(row => row.fill(null));
+
+    // empty HTML board
+    const htmlBoard = document.getElementById('board');
+    const pieces = htmlBoard.querySelectorAll('.piece');
+    pieces.forEach(piece => piece.remove());
+
   }
 
   /** handleClick: handle click of column top to play piece */
