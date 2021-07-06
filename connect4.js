@@ -22,12 +22,12 @@ class Game {
     this.WIDTH = width;
     this.HEIGHT = height;
     this.board = [];
-    this.currPlayer = 1;
     this.isPlaying = false;
+    this.players = [];
 
+    this.makeMenu();
     this.makeBoard();
     this.makeHtmlBoard();
-    this.makeMenu();
   }
 
   /** makeBoard: create in-JS board structure:
@@ -77,11 +77,34 @@ class Game {
   }
 
   /** makeMenu: create menu */
-
+  //TODO
   makeMenu() {
-    const menu = document.getElementById('menu');
+    console.log('making menu');
+    // prevent default submission behavior
+    const form = document.querySelector('form');
+    this.handleForm = this.handlePlayerForm.bind(this);
+    form.addEventListener('submit', this.handleForm);
 
+    // create and append start button to form
     this.createStartButton();
+  }
+
+  /** handlePlayerForm */
+  handlePlayerForm(evt) {
+    console.log('creating player form');
+    console.log(this);
+    evt.preventDefault();
+
+    const p1Color = document.getElementById('player1-color').value; 
+    const p2Color = document.getElementById('player2-color').value; 
+
+    // initialize player classes
+    const player1 = new Player(p1Color);
+    const player2 = new Player(p2Color);
+
+    // update player piece colors
+    this.players = [player1, player2];
+    this.currPlayer = player1;
   }
 
   // handle start button click
@@ -113,11 +136,16 @@ class Game {
     start.innerText = 'START';
 
     // add button to DOM
-    const menu = document.getElementById('menu');
-    menu.appendChild(start);
+    const form = document.querySelector('form');
+    form.appendChild(start);
 
     // add event handler to start button
     this.activateStartButton();
+  }
+
+  /** switchPlayers: switch currPlayer reference */
+  switchPlayers() {
+    this.currPlayer = (this.currPlayer === this.players[0])? this.players[1]: this.players[0];
   }
 
   /** placeInTable: update DOM to place piece into HTML table of board */
@@ -125,8 +153,8 @@ class Game {
   placeInTable(y, x) {
     const piece = document.createElement('div');
     piece.classList.add('piece');
-    piece.classList.add(`p${this.currPlayer}`);
     piece.style.top = -50 * (y + 2);
+    piece.style.backgroundColor = this.currPlayer.color;
   
     const spot = document.getElementById(`${y}-${x}`);
     spot.append(piece);
@@ -135,19 +163,15 @@ class Game {
   /** endGame: announce game end */
   
   endGame(msg) {
+    // stop game
     this.isPlaying = false;
 
-    
-
     // add delay to ensure last piece has been added
-    setTimeout( () => {
-        
-        alert(msg);
-        // reactivate start button -- add event listener
-        this.activateStartButton();
-      },
-      100
-    );
+    setTimeout(() => {
+      alert(msg);
+      // reactivate start button -- add event listener
+      this.activateStartButton();
+    }, 100);
     
   }
 
@@ -185,7 +209,7 @@ class Game {
     
     // check for win
     if (this.checkForWin()) {
-      return this.endGame(`Player ${this.currPlayer} won!`);
+      return this.endGame(`Player ${this.players.indexOf(this.currPlayer) + 1} won!`);
     }
     
     // check for tie
@@ -194,7 +218,7 @@ class Game {
     }
       
     // switch players
-    this.currPlayer = (this.currPlayer === 1) ? 2 : 1;
+    this.switchPlayers();
   }
   
   /** checkForWin: check board cell-by-cell for "does a win start here?" */
@@ -234,6 +258,14 @@ class Game {
   }
 
   
+
+}
+
+class Player {
+
+  constructor(color) {
+    this.color = color;
+  }
 
 }
 
